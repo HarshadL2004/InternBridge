@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: internbridge-frontend
+    env: node
+    region: oregon
+    plan: starter
+    repo: <your-repo-url>
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    rootDir: frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
