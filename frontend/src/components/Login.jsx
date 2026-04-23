@@ -33,7 +33,7 @@ const Login = () => {
             return;
         }
 
-        axios.post('http://localhost:5001/login', { email, password })
+        axios.post('https://internbridge-backend-p5xk.onrender.com/login', { email, password })
             .then(res => {
                 if (res.data.success) {
                     Toast.fire({ icon: "success", title: `Welcome back 👋` });
