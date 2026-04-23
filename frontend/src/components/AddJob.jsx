@@ -67,7 +67,7 @@ const AddJob = () => {
             color: '#fff',
         }).then(async (result) => {
             if (result.isConfirmed) {
-                axios.post('http://localhost:5001/add_internship', jobDetails)
+                axios.post('https://internbridge-backend-p5xk.onrender.com/add_internship', jobDetails)
                     .then(res => {
                         if (res.data.acknowledged) {
                             Swal.fire({ title: "Posted! 🎉", text: "Your internship is now live.", icon: "success", background: '#0f2418', color: '#fff', confirmButtonColor: '#05AF2B' });
