@@ -48,11 +48,16 @@ function setupResumeRoutes(database) {
 
       // Call AI service for resume analysis
       const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+      console.log('Calling AI service at:', aiServiceUrl);
+      
       const aiRes = await axios.post(`${aiServiceUrl}/analyze`, form, {
         headers,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
+        timeout: 60000, // 60 second timeout
       });
+
+      console.log('AI service response received successfully');
 
       // Save to database
       const resumeData = {
@@ -76,13 +81,30 @@ function setupResumeRoutes(database) {
         ...resumeData,
       });
     } catch (error) {
-      console.error('Upload error:', error.message);
+      console.error('=== UPLOAD ERROR ===');
+      console.error('Error type:', error.code || error.name);
+      console.error('Error message:', error.message);
+      
       if (error.response) {
         console.error('AI service response status:', error.response.status);
         console.error('AI service response data:', error.response.data);
+        console.error('AI service response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('No response received from AI service');
+        console.error('Request data:', error.request);
+      } else {
+        console.error('Error details:', error.stack);
       }
+      
+      const errorMsg = error.response?.data?.detail || 
+                       error.response?.data?.msg || 
+                       error.message || 
+                       'Upload failed';
+      
       res.status(500).json({
-        msg: error.response?.data?.detail || error.response?.data?.msg || error.message || 'Upload failed',
+        msg: errorMsg,
+        error: process.env.NODE_ENV === 'development' ? error.message : 'AI service error',
+        aiServiceUrl: process.env.AI_SERVICE_URL || 'Not set (using localhost)',
       });
     } finally {
       if (req.file?.path) {
