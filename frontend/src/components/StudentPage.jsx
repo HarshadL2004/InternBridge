@@ -16,7 +16,7 @@ const StudentPage = () => {
         try {
             setLoading(true);
             // Fetch all local internships
-            const localRes = await fetch("http://localhost:5001/internships");
+            const localRes = await fetch("https://internbridge-backend-p5xk.onrender.com/internships");
             const localData = await localRes.json();
 
             // Fetch external internships
@@ -85,7 +85,7 @@ const StudentPage = () => {
 
             // Fetch applied internships if user logged in
             if (user?.email) {
-                const appRes = await fetch(`http://localhost:5001/applications/student/${user.email}`);
+                const appRes = await fetch(`https://internbridge-backend-p5xk.onrender.com/applications/student/${user.email}`);
                 const appData = await appRes.json();
                 // Ensure appData is an array
                 setAppliedInternships(Array.isArray(appData) ? appData : []);
