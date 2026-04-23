@@ -134,7 +134,7 @@ const JobDetails = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.put(`https://internbridge-backend-p5xk.onrender.com/internship/${id}`, formData);
+            const res = await axios.put(`https://internbridge-backend-098c.onrender.com/internship/${id}`, formData);
             if (res.data.success) {
                 Swal.fire("Updated!", res.data.message, "success");
                 setIsModalOpen(false);
