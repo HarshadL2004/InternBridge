@@ -85,7 +85,7 @@ const StudentPage = () => {
 
             // Fetch applied internships if user logged in
             if (user?.email) {
-                const appRes = await fetch(`https://internbridge-backend-p5xk.onrender.com/applications/student/${user.email}`);
+                const appRes = await fetch(`https://internbridge-backend-098c.onrender.com/applications/student/${user.email}`);
                 const appData = await appRes.json();
                 // Ensure appData is an array
                 setAppliedInternships(Array.isArray(appData) ? appData : []);
