@@ -79,28 +79,14 @@ export default function Dashboard({ token }) {
         setLoading(false);
         return;
       }
-      
-      console.log('Starting upload with file:', file.name, 'Token:', token?.substring(0, 20) + '...');
-      
       const res = await uploadResume(file, token);
-      console.log('Upload response:', res.data);
-      
       setResult(res.data);
       const h = await getHistory(token);
       setHistory(h.data);
       calculateStats(h.data);
     } catch (err) {
       console.error("Upload failed:", err);
-      console.error("Error response:", err.response?.data);
-      console.error("Error status:", err.response?.status);
-      console.error("Error config:", err.config);
-      
-      const errorMsg = err.response?.data?.msg || 
-                       err.response?.data?.detail || 
-                       err.message || 
-                       "Upload failed. Please try again.";
-      
-      setError(errorMsg);
+      setError(err.response?.data?.msg || err.message || "Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
