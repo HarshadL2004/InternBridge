@@ -314,7 +314,43 @@ async function run() {
     const resumeRouter = setupResumeRoutes(database);
     app.use('/api/resume', resumeRouter);
 
-
+    // --- Diagnostic Endpoint ---
+    app.get('/api/diagnostic/ai-service', async (req, res) => {
+      try {
+        const axios = require('axios');
+        const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+        
+        console.log('Testing AI service connectivity to:', aiServiceUrl);
+        
+        const response = await axios.get(`${aiServiceUrl}/health`, {
+          timeout: 10000,
+        }).catch(() => {
+          // If /health endpoint doesn't exist, try /docs or root
+          return axios.get(aiServiceUrl, { timeout: 10000 });
+        });
+        
+        res.json({
+          status: 'success',
+          aiServiceUrl,
+          aiServiceStatus: 'Online',
+          message: 'AI service is accessible'
+        });
+      } catch (error) {
+        console.error('AI service diagnostic error:', error.message);
+        res.status(503).json({
+          status: 'error',
+          aiServiceUrl: process.env.AI_SERVICE_URL || 'Not set',
+          aiServiceStatus: 'Offline or unreachable',
+          message: error.message,
+          suggestions: [
+            'Check if AI_SERVICE_URL environment variable is set correctly',
+            'Verify the AI service is deployed and running on Render',
+            'Check network connectivity to the AI service',
+            'Ensure AI service CORS allows requests from backend'
+          ]
+        });
+      }
+    });
 
 
 
