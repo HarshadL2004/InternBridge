@@ -181,7 +181,7 @@ const JobDetails = () => {
         }
 
         try {
-            const res = await axios.post('https://internbridge-backend-p5xk.onrender.com/apply_internship', {
+            const res = await axios.post('https://internbridge-backend-098c.onrender.com/apply_internship', {
                 jobId: job._id,
                 jobTitle: job.title,
                 jobCompany: job.email,
