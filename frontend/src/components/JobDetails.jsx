@@ -89,7 +89,7 @@ const JobDetails = () => {
                 };
             } else {
                 // Fetch from local backend
-                const res = await fetch(`https://internbridge-backend-p5xk.onrender.com/internship/${id}`);
+                const res = await fetch(`https://internbridge-backend-098c.onrender.com/internship/${id}`);
                 return res.json();
             }
         },
