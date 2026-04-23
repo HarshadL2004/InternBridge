@@ -110,7 +110,7 @@ const JobDetails = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const res = await axios.delete(`https://internbridge-backend-p5xk.onrender.com/internship/${id}`);
+                    const res = await axios.delete(`https://internbridge-backend-098c.onrender.com/internship/${id}`);
                     if (res.data.success) {
                         Swal.fire({ title: "Deleted!", text: res.data.message, icon: "success", background: '#0f2418', color: '#fff' });
                         nav("/");
