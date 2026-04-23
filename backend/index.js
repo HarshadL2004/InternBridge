@@ -352,6 +352,30 @@ async function run() {
       }
     });
 
+    // --- Debug Info Endpoint ---
+    app.get('/api/debug/info', (req, res) => {
+      res.json({
+        environment: process.env.NODE_ENV || 'development',
+        port: port,
+        ai_service_configured: !!process.env.AI_SERVICE_URL,
+        ai_service_url: process.env.AI_SERVICE_URL || 'Using default: http://127.0.0.1:8001',
+        db_connected: 'pending', // Would be true/false after full startup
+        features: {
+          resume_upload: true,
+          resume_analysis: true,
+          resume_history: true,
+          test_upload: true
+        },
+        endpoints: {
+          test_upload: '/api/resume/test-upload',
+          upload: '/api/resume/upload',
+          history: '/api/resume/history',
+          diagnostic: '/api/diagnostic/ai-service',
+          debug: '/api/debug/info'
+        }
+      });
+    });
+
 
 
 
