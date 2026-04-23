@@ -47,7 +47,8 @@ function setupResumeRoutes(database) {
       };
 
       // Call AI service for resume analysis
-      const aiRes = await axios.post('http://127.0.0.1:8001/analyze', form, {
+      const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+      const aiRes = await axios.post(`${AI_SERVICE_URL}/analyze`, form, {
         headers,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
