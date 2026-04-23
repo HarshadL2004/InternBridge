@@ -6,7 +6,7 @@ const fs = require('fs');
 const { ObjectId } = require('mongodb');
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * Setup Resume Routes with MongoDB Database Connection
@@ -37,7 +37,7 @@ function setupResumeRoutes(database) {
       }
 
       const form = new FormData();
-      form.append('resume', fs.createReadStream(req.file.path), {
+      form.append('resume', req.file.buffer, {
         filename: req.file.originalname,
         contentType: req.file.mimetype,
       });
@@ -84,14 +84,6 @@ function setupResumeRoutes(database) {
       res.status(500).json({
         msg: error.response?.data?.detail || error.response?.data?.msg || error.message || 'Upload failed',
       });
-    } finally {
-      if (req.file?.path) {
-        fs.unlink(req.file.path, (unlinkError) => {
-          if (unlinkError) {
-            console.warn('Could not delete temporary upload file:', unlinkError.message);
-          }
-        });
-      }
     }
   });
 
