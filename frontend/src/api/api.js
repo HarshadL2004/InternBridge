@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = 'https://internbridge-backend-p5xk.onrender.com';
 
 // Create axios instance with default config
 const api = axios.create({
