@@ -6,7 +6,7 @@ const fs = require('fs');
 const { ObjectId } = require('mongodb');
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ dest: 'uploads/' });
 
 /**
  * Setup Resume Routes with MongoDB Database Connection
@@ -37,7 +37,7 @@ function setupResumeRoutes(database) {
       }
 
       const form = new FormData();
-      form.append('resume', req.file.buffer, {
+      form.append('resume', fs.createReadStream(req.file.path), {
         filename: req.file.originalname,
         contentType: req.file.mimetype,
       });
@@ -47,8 +47,8 @@ function setupResumeRoutes(database) {
       };
 
       // Call AI service for resume analysis
-      const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
-      const aiRes = await axios.post(`${AI_SERVICE_URL}/analyze`, form, {
+      const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+      const aiRes = await axios.post(`${aiServiceUrl}/analyze`, form, {
         headers,
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
@@ -84,6 +84,14 @@ function setupResumeRoutes(database) {
       res.status(500).json({
         msg: error.response?.data?.detail || error.response?.data?.msg || error.message || 'Upload failed',
       });
+    } finally {
+      if (req.file?.path) {
+        fs.unlink(req.file.path, (unlinkError) => {
+          if (unlinkError) {
+            console.warn('Could not delete temporary upload file:', unlinkError.message);
+          }
+        });
+      }
     }
   });
 
