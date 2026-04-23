@@ -39,7 +39,7 @@ const Signup = () => {
             return;
         }
 
-        axios.post('https://internbridge-backend-p5xk.onrender.com/add_user', { email, password, role })
+        axios.post('https://internbridge-backend-098c.onrender.com', { email, password, role })
             .then(() => {
                 const newUser = { email, role };
                 localStorage.setItem('user', JSON.stringify(newUser));
