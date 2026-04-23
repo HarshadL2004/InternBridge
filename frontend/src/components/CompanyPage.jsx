@@ -13,7 +13,7 @@ const CompanyPage = () => {
 
     useEffect(() => {
         if (user?.email) {
-            fetch(`http://localhost:5001/internships/company/${user.email}`)
+            fetch(`https://internbridge-backend-p5xk.onrender.com/internships/company/${user.email}`)
                 .then(res => res.json())
                 .then(data => { 
                     setAllInternships(data);
