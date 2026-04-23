@@ -6,7 +6,7 @@ const CollegePage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('https://internbridge-backend-p5xk.onrender.com/college/stats')
+        fetch('https://internbridge-backend-098c.onrender.com/college/stats')
             .then(res => res.json())
             .then(data => {
                 setStatsData(data);
