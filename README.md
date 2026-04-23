@@ -212,7 +212,7 @@ AI_SERVICE_URL=http://localhost:8000
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/your-username/internbridge.git
+git clone https://github.com/HarshadL2004/InternBridge.git
 cd internbridge
 ```
 
