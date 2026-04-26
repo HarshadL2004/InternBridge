@@ -9,11 +9,12 @@ const CompanyPage = () => {
     const { user } = useContext(AuthContext);
     const [allInternships, setAllInternships] = useState([]);
     const [internships, setInternships] = useState([]);
+    const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (user?.email) {
-            fetch(`https://internbridge-backend-098c.onrender.com/internships/company/${user.email}`)
+            fetch(`http://localhost:5001/internships/company/${user.email}`)
                 .then(res => res.json())
                 .then(data => { 
                     setAllInternships(data);
@@ -21,6 +22,13 @@ const CompanyPage = () => {
                     setLoading(false); 
                 })
                 .catch(err => { console.error(err); setLoading(false); });
+
+            fetch(`http://localhost:5001/applications/company/${user.email}`)
+                .then(res => res.json())
+                .then(data => {
+                    setApplications(data);
+                })
+                .catch(err => console.error(err));
         } else {
             setLoading(false);
         }
@@ -123,9 +131,64 @@ const CompanyPage = () => {
                         </NavLink>
                     </div>
                 )}
+
+                {/* ── All Applications ── */}
+                <div className="mt-16 glass-card rounded-3xl overflow-hidden fade-in-up" style={{ animationDelay: '0.2s' }}>
+                    <div className="p-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                                All Candidate Applications
+                            </h2>
+                            <span className="badge-purple">{applications.length} Total</span>
+                        </div>
+                        {applications.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-gray-800">
+                                            <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Candidate Name</th>
+                                            <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
+                                            <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Phone</th>
+                                            <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Applied Role</th>
+                                            <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Resume</th>
+                                            <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-800/50">
+                                        {applications.map(app => (
+                                            <tr key={app._id} className="hover:bg-white/5 transition-colors">
+                                                <td className="py-4 px-4 text-sm font-medium text-white">{app.candidateName || 'N/A'}</td>
+                                                <td className="py-4 px-4 text-sm text-gray-400">{app.candidateEmail || app.studentEmail}</td>
+                                                <td className="py-4 px-4 text-sm text-gray-400">{app.candidatePhone || 'N/A'}</td>
+                                                <td className="py-4 px-4 text-sm font-semibold text-[#05AF2B]">{app.jobTitle || 'Unknown Role'}</td>
+                                                <td className="py-4 px-4">
+                                                    {app.resumeData ? (
+                                                        <a href={app.resumeData} download={app.resumeName || 'Resume'} className="text-[#05AF2B] hover:text-[#4ade80] text-sm font-medium flex items-center gap-1 transition-colors">
+                                                            📄 Download
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-gray-600 text-sm">No Resume</span>
+                                                    )}
+                                                </td>
+                                                <td className="py-4 px-4 text-sm text-gray-500">
+                                                    {new Date(app.appliedDate || app._id?.getTimestamp?.() || Date.now()).toLocaleDateString()}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="text-center p-8 rounded-2xl bg-white/5 border border-white/10">
+                                <p className="text-gray-400 text-sm">You haven't received any applications yet.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
 
 export default CompanyPage;
+
