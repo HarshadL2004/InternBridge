@@ -16,7 +16,7 @@ const StudentPage = () => {
         try {
             setLoading(true);
             // Fetch all local internships
-            const localRes = await fetch("http://localhost:5001/internships");
+            const localRes = await fetch("https://internbridge-backend-098c.onrender.com/internships");
             const localData = await localRes.json();
 
             // Fetch external internships
