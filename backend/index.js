@@ -263,26 +263,15 @@ async function run() {
             };
           } else if (app.jobId && ObjectId.isValid(app.jobId)) {
             const job = await jobCollection.findOne({ _id: new ObjectId(app.jobId) });
+            if (!job) return null; // Filter out if job deleted
             return { 
               ...app, 
-              jobDetails: job || {
-                _id: app.jobId,
-                title: app.jobTitle || "Deleted Internship",
-                email: app.jobCompany || "N/A"
-              }
+              jobDetails: job
             };
           } else {
-            // Invalid or missing ID
-            return {
-              ...app,
-              jobDetails: {
-                _id: app.jobId || 'unknown',
-                title: "Unknown Internship",
-                email: "N/A"
-              }
-            };
+            return null; // Invalid ID
           }
-        }));
+        })).then(results => results.filter(Boolean));
 
         res.send(detailedApplications);
       } catch (error) {
