@@ -179,7 +179,9 @@ async function run() {
         const query = { _id: new ObjectId(id) };
         const result = await jobCollection.deleteOne(query);
         if (result.deletedCount > 0) {
-          res.send({ success: true, message: "Job deleted successfully" });
+          // Delete all applications related to this job
+          await applicationCollection.deleteMany({ jobId: id });
+          res.send({ success: true, message: "Job and related applications deleted successfully" });
         } else {
           res.status(404).send({ success: false, message: "Job not found" });
         }
