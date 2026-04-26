@@ -44,7 +44,7 @@ const Home = () => {
         const fetchJobs = async () => {
             try {
                 setLoading(true);
-                const localRes = await fetch("https://internbridge-backend-098c.onrender.com/internships");
+                const localRes = await fetch("http://localhost:5001/internships");
                 const localData = await localRes.json();
 
                 const arbeitRes = await fetch("https://www.arbeitnow.com/api/job-board-api");
@@ -104,7 +104,7 @@ const Home = () => {
                     }
                 });
 
-                const activeLocalJobs = localData.filter(job => job.deadline >= today);
+                const activeLocalJobs = localData.filter(job => !job.deadline || job.deadline >= today);
                 const combined = [...activeLocalJobs, ...formattedArbeit];
                 setAllJobs(combined);
                 setJobs(combined);
@@ -277,3 +277,4 @@ const Home = () => {
 };
 
 export default Home;
+
