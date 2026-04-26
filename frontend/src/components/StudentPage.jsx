@@ -16,7 +16,7 @@ const StudentPage = () => {
         try {
             setLoading(true);
             // Fetch all local internships
-            const localRes = await fetch("https://internbridge-backend-098c.onrender.com/internships");
+            const localRes = await fetch("http://localhost:5001/internships");
             const localData = await localRes.json();
 
             // Fetch external internships
@@ -77,7 +77,7 @@ const StudentPage = () => {
                 }
             });
 
-            const activeLocalJobs = localData.filter(job => job.deadline >= today);
+            const activeLocalJobs = localData.filter(job => !job.deadline || job.deadline >= today);
             const combined = [...activeLocalJobs, ...formattedArbeit];
             
             setAllInternships(combined);
@@ -85,7 +85,7 @@ const StudentPage = () => {
 
             // Fetch applied internships if user logged in
             if (user?.email) {
-                const appRes = await fetch(`https://internbridge-backend-098c.onrender.com/applications/student/${user.email}`);
+                const appRes = await fetch(`http://localhost:5001/applications/student/${user.email}`);
                 const appData = await appRes.json();
                 // Ensure appData is an array
                 setAppliedInternships(Array.isArray(appData) ? appData : []);
@@ -228,3 +228,4 @@ const StudentPage = () => {
 };
 
 export default StudentPage;
+
