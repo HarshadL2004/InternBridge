@@ -293,6 +293,17 @@ async function run() {
       }
     });
 
+    app.get('/applications/company/:email', async (req, res) => {
+      try {
+        const { email } = req.params;
+        const applications = await applicationCollection.find({ jobCompany: email }).toArray();
+        res.send(applications);
+      } catch (error) {
+        console.error("Fetch company applications error:", error);
+        res.status(500).send({ error: error.message });
+      }
+    });
+
     // --- College Stats Route ---
     app.get('/college/stats', async (req, res) => {
       try {
