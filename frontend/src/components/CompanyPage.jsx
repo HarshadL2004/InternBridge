@@ -14,7 +14,7 @@ const CompanyPage = () => {
 
     useEffect(() => {
         if (user?.email) {
-            fetch(`http://localhost:5001/internships/company/${user.email}`)
+            fetch(`https://internbridge-backend-098c.onrender.com/internships/company/${user.email}`)
                 .then(res => res.json())
                 .then(data => { 
                     setAllInternships(data);
@@ -23,7 +23,7 @@ const CompanyPage = () => {
                 })
                 .catch(err => { console.error(err); setLoading(false); });
 
-            fetch(`http://localhost:5001/applications/company/${user.email}`)
+            fetch(`https://internbridge-backend-098c.onrender.com/applications/company/${user.email}`)
                 .then(res => res.json())
                 .then(data => {
                     setApplications(data);
