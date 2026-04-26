@@ -290,6 +290,17 @@ async function run() {
       }
     });
 
+    app.get('/applications/job/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const applications = await applicationCollection.find({ jobId: id }).toArray();
+        res.send(applications);
+      } catch (error) {
+        console.error("Fetch job applications error:", error);
+        res.status(500).send({ error: error.message });
+      }
+    });
+
     // --- College Stats Route ---
     app.get('/college/stats', async (req, res) => {
       try {
