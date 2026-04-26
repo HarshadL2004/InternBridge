@@ -13,6 +13,8 @@ const JobDetails = () => {
     const nav = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({});
+    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+    const [applyFormData, setApplyFormData] = useState({ name: '', email: '', phone: '', resumeData: '', resumeName: '' });
 
     const parseExternalDescription = (xml) => {
         if (!xml) return { description: "", responsibilities: "", requirements: "", perks: "" };
@@ -89,10 +91,26 @@ const JobDetails = () => {
                 };
             } else {
                 // Fetch from local backend
-                const res = await fetch(`https://internbridge-backend-098c.onrender.com/internship/${id}`);
+                const res = await fetch(`http://localhost:5001/internship/${id}`);
                 return res.json();
             }
         },
+    });
+
+    const userStorage = JSON.parse(localStorage.getItem('user'));
+    const user = userStorage?.email;
+    const userRole = userStorage?.role;
+    const isOwner = user && job ? user === job.email : false;
+
+    const userEmail = JSON.parse(localStorage.getItem('user'))?.email;
+
+    const { data: applicants, isPending: isApplicantsPending } = useQuery({
+        queryKey: [id, 'applications'],
+        queryFn: async () => {
+            const res = await fetch(`http://localhost:5001/applications/job/${id}`);
+            return res.json();
+        },
+        enabled: isOwner,
     });
 
     const handelDelete = (id) => {
@@ -110,7 +128,7 @@ const JobDetails = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const res = await axios.delete(`https://internbridge-backend-098c.onrender.com/internship/${id}`);
+                    const res = await axios.delete(`http://localhost:5001/internship/${id}`);
                     if (res.data.success) {
                         Swal.fire({ title: "Deleted!", text: res.data.message, icon: "success", background: '#0f2418', color: '#fff' });
                         nav("/");
@@ -134,7 +152,7 @@ const JobDetails = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.put(`https://internbridge-backend-098c.onrender.com/internship/${id}`, formData);
+            const res = await axios.put(`http://localhost:5001/internship/${id}`, formData);
             if (res.data.success) {
                 Swal.fire("Updated!", res.data.message, "success");
                 setIsModalOpen(false);
@@ -162,14 +180,29 @@ const JobDetails = () => {
         </div>
     );
 
-    const userStorage = JSON.parse(localStorage.getItem('user'));
-    const user = userStorage?.email;
-    const userRole = userStorage?.role;
-    const isOwner = user === job.email;
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire("File too large", "Please select a file smaller than 2MB.", "error");
+                e.target.value = null;
+                return;
+            }
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                setApplyFormData({ ...applyFormData, resumeData: reader.result, resumeName: file.name });
+            };
+        }
+    };
 
-    const userEmail = JSON.parse(localStorage.getItem('user'))?.email;
+    const handleApplyInputChange = (e) => {
+        const { name, value } = e.target;
+        setApplyFormData({ ...applyFormData, [name]: value });
+    };
 
-    const handelApply = async () => {
+    const submitApplication = async (e) => {
+        e.preventDefault();
         if (!userEmail) {
             Swal.fire("Error!", "Please login to apply.", "error");
             return;
@@ -181,11 +214,16 @@ const JobDetails = () => {
         }
 
         try {
-            const res = await axios.post('https://internbridge-backend-098c.onrender.com/apply_internship', {
+            const res = await axios.post('http://localhost:5001/apply_internship', {
                 jobId: job._id,
                 jobTitle: job.title,
                 jobCompany: job.email,
                 studentEmail: userEmail,
+                candidateName: applyFormData.name,
+                candidateEmail: applyFormData.email,
+                candidatePhone: applyFormData.phone,
+                resumeData: applyFormData.resumeData,
+                resumeName: applyFormData.resumeName,
                 status: 'Applied'
             });
 
@@ -198,6 +236,9 @@ const JobDetails = () => {
                     color: '#fff',
                     confirmButtonColor: '#05AF2B',
                 });
+                setIsApplyModalOpen(false);
+                setApplyFormData({ name: '', email: '', phone: '', resumeData: '', resumeName: '' });
+                if (isOwner) refetch(); // Just in case, though owner usually doesn't apply
             } else {
                 Swal.fire({
                     title: "Already Applied",
@@ -210,6 +251,15 @@ const JobDetails = () => {
         } catch (error) {
             Swal.fire("Error!", "Failed to submit application.", "error");
         }
+    };
+
+    const openApplyModal = () => {
+        if (!userEmail) {
+            Swal.fire("Error!", "Please login to apply.", "error");
+            return;
+        }
+        setApplyFormData({ ...applyFormData, email: userEmail });
+        setIsApplyModalOpen(true);
     };
 
     return (
@@ -349,7 +399,7 @@ const JobDetails = () => {
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             {userRole === 'Student' && (
                                 <button
-                                    onClick={handelApply}
+                                    onClick={openApplyModal}
                                     className="btn-primary-glow px-8 py-3 text-base !rounded-2xl"
                                 >
                                     Apply Now →
@@ -377,6 +427,61 @@ const JobDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* ── Applicants Section for Owner ── */}
+                {isOwner && (
+                    <div className="glass-card rounded-3xl overflow-hidden mt-8 fade-in-up" style={{ animationDelay: '0.1s' }}>
+                        <div className="p-8">
+                            <h2 className="text-2xl font-black text-white mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                                Candidate Applications
+                            </h2>
+                            {isApplicantsPending ? (
+                                <div className="flex items-center justify-center p-8">
+                                    <div className="w-8 h-8 border-2 border-[#05AF2B]/30 border-t-[#05AF2B] rounded-full animate-spin" />
+                                </div>
+                            ) : applicants && applicants.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-gray-800">
+                                                <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Candidate Name</th>
+                                                <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
+                                                <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Phone</th>
+                                                <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Resume</th>
+                                                <th className="py-4 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Applied On</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-800/50">
+                                            {applicants.map(app => (
+                                                <tr key={app._id} className="hover:bg-white/5 transition-colors">
+                                                    <td className="py-4 px-4 text-sm font-medium text-white">{app.candidateName || 'N/A'}</td>
+                                                    <td className="py-4 px-4 text-sm text-gray-400">{app.candidateEmail || app.studentEmail}</td>
+                                                    <td className="py-4 px-4 text-sm text-gray-400">{app.candidatePhone || 'N/A'}</td>
+                                                    <td className="py-4 px-4">
+                                                        {app.resumeData ? (
+                                                            <a href={app.resumeData} download={app.resumeName || 'Resume'} className="text-[#05AF2B] hover:text-[#4ade80] text-sm font-medium flex items-center gap-1 transition-colors">
+                                                                📄 Download
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-gray-600 text-sm">No Resume</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-4 px-4 text-sm text-gray-500">
+                                                        {new Date(app.appliedDate || app._id?.getTimestamp?.() || Date.now()).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="text-center p-8 rounded-2xl bg-white/5 border border-white/10">
+                                    <p className="text-gray-400 text-sm">No applications received yet.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ── Update Modal ── */}
@@ -433,6 +538,89 @@ const JobDetails = () => {
                                 </button>
                                 <button type="submit" className="btn-primary-glow !py-2.5 !px-6 !text-sm !rounded-xl">
                                     Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Apply Modal ── */}
+            {isApplyModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4">
+                    <div className="glass-card rounded-3xl p-8 w-full max-w-lg shadow-2xl fade-in-up">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                                Apply for Internship
+                            </h2>
+                            <button onClick={() => setIsApplyModalOpen(false)} className="text-gray-500 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+                                <HiX className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={submitApplication} className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-gray-400 font-medium tracking-wider uppercase">Full Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={applyFormData.name}
+                                    onChange={handleApplyInputChange}
+                                    placeholder="John Doe"
+                                    required
+                                    className="input-premium rounded-xl"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-gray-400 font-medium tracking-wider uppercase">Email Address</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={applyFormData.email}
+                                    onChange={handleApplyInputChange}
+                                    placeholder="john@example.com"
+                                    required
+                                    disabled
+                                    className="input-premium rounded-xl opacity-70 cursor-not-allowed"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-gray-400 font-medium tracking-wider uppercase">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={applyFormData.phone}
+                                    onChange={handleApplyInputChange}
+                                    placeholder="+1 234 567 890"
+                                    required
+                                    className="input-premium rounded-xl"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-gray-400 font-medium tracking-wider uppercase">Upload Resume (PDF/Doc/Image)</label>
+                                <input
+                                    type="file"
+                                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                    onChange={handleFileChange}
+                                    required
+                                    className="input-premium rounded-xl py-2"
+                                />
+                                <p className="text-[10px] text-gray-500 mt-1">Max file size: 2MB</p>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsApplyModalOpen(false)}
+                                    className="px-5 py-2.5 rounded-xl text-sm text-gray-400 bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary-glow !py-2.5 !px-6 !text-sm !rounded-xl">
+                                    Submit Application
                                 </button>
                             </div>
                         </form>
