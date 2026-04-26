@@ -178,3 +178,4 @@ const CollegePage = () => {
 };
 
 export default CollegePage;
+
