@@ -91,7 +91,7 @@ const JobDetails = () => {
                 };
             } else {
                 // Fetch from local backend
-                const res = await fetch(`http://localhost:5001/internship/${id}`);
+                const res = await fetch(`https://internbridge-backend-098c.onrender.com/internship/${id}`);
                 return res.json();
             }
         },
@@ -107,7 +107,7 @@ const JobDetails = () => {
     const { data: applicants, isPending: isApplicantsPending } = useQuery({
         queryKey: [id, 'applications'],
         queryFn: async () => {
-            const res = await fetch(`http://localhost:5001/applications/job/${id}`);
+            const res = await fetch(`https://internbridge-backend-098c.onrender.com/applications/job/${id}`);
             return res.json();
         },
         enabled: isOwner,
@@ -128,7 +128,7 @@ const JobDetails = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const res = await axios.delete(`http://localhost:5001/internship/${id}`);
+                    const res = await axios.delete(`https://internbridge-backend-098c.onrender.com/internship/${id}`);
                     if (res.data.success) {
                         Swal.fire({ title: "Deleted!", text: res.data.message, icon: "success", background: '#0f2418', color: '#fff' });
                         nav("/");
@@ -152,7 +152,7 @@ const JobDetails = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.put(`http://localhost:5001/internship/${id}`, formData);
+            const res = await axios.put(`https://internbridge-backend-098c.onrender.com/internship/${id}`, formData);
             if (res.data.success) {
                 Swal.fire("Updated!", res.data.message, "success");
                 setIsModalOpen(false);
@@ -214,7 +214,7 @@ const JobDetails = () => {
         }
 
         try {
-            const res = await axios.post('http://localhost:5001/apply_internship', {
+            const res = await axios.post('https://internbridge-backend-098c.onrender.com/apply_internship', {
                 jobId: job._id,
                 jobTitle: job.title,
                 jobCompany: job.email,
